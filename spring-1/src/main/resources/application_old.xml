@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       ">
+    <!-- bean 就是java类 -->
+    <!-- id 设置名称 class全限定名 -->
+    <!--
+     相当于
+     UserServicesImpl userServices = new UserServicesImpl();
+     -->
+    <bean id="userServices" class="com.cos.s1.services.impl.UserServicesImpl"/>
+    <!-- 配置user  ioc/di -->
+    <bean id="user" class="com.cos.s1.entity.User">
+        <!-- property 是使用get/set方法 -->
+        <!-- DI 依赖注入 理解方式就是赋值 -->
+        <!-- 字面值 -->
+        <property name="username" value="张三"/>
+        <property name="age" value="18"/>
+        <property name="sex" value="男"/>
+        <property name="salary" value="123.3"/>
+        <!-- spring中 日期 需要使用格式为/ -->
+        <property name="bornDate" value="2020/2/2"/>
+        <property name="city">
+            <!-- 数组的赋值 -->
+            <array>
+                <value>深圳</value>
+                <value>北京</value>
+                <value>上海</value>
+            </array>
+        </property>
+        <property name="hobby">
+            <list>
+                <value>敲代码</value>
+                <value>读代码</value>
+                <value>写代码</value>
+                <value>爱代码</value>
+            </list>
+        </property>
+        <property name="xl">
+            <set>
+                <value>小学</value>
+                <value>初中学</value>
+                <value>高中学</value>
+                <value>专科</value>
+                <value>大学</value>
+                <value>硕士</value>
+                <value>博士</value>
+                <value>博士后</value>
+                <value>博士前</value>
+            </set>
+        </property>
+        <property name="ruyu">
+            <map>
+                <entry key="1">
+                    <value>敲代码</value>
+                </entry>
+                <entry key="2">
+                    <value>不敲代码</value>
+                </entry>
+            </map>
+        </property>
+        <!-- ref 引用
+        Address add = new Address();
+        User u = new User();
+        u.setAddress(add);
+        -->
+        <!--<property name="address" ref="add"/>-->
+        <property name="address">
+            <!-- 直接创建一个对象来赋值
+            User u = new User();
+            u.setAddress(new Address());
+            -->
+            <bean class="com.cos.s1.entity.Address" >
+                <property name="address" value="后瑞"/>
+            </bean>
+        </property>
+    </bean>
+    <bean id="add" class="com.cos.s1.entity.Address">
+        <property name="address" value="西部硅谷"/>
+    </bean>
+    <!--
+     构造注入
+    -->
+    <bean id="user2" class="com.cos.s1.entity.User">
+        <!--
+        1.index 构造方法参数的下标位置 第一个参数下标为0,以此类推
+        2.只写value就是按照上下顺序来找构造方法
+        3.使用name属性来设置构造注入其值就是构造方法中的形参名称
+         -->
+        <constructor-arg name="username" value="haha"/>
+        <constructor-arg name="salary" value="123"/>
+        <constructor-arg name="age" value="18"/>
+        <constructor-arg name="sex" value="haha"/>
+<!--
+        <constructor-arg value="haha"/>
+        <constructor-arg value="123"/>
+        <constructor-arg value="18"/>
+        <constructor-arg value="haha"/>
+-->
+<!--        <constructor-arg index="0" value="haha"/>-->
+<!--        <constructor-arg index="3" value="18"/>-->
+<!--        <constructor-arg index="2" value="haha"/>-->
+<!--        <constructor-arg index="1" value="123"/>-->
+    </bean>
+</beans>

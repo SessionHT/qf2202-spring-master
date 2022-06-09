@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:conext="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+       ">
+    <!-- 0 告诉spring去哪里扫描注解,com.cos.mp包下的所有类,及其子类都要扫描注解 -->
+    <conext:component-scan base-package="com.cos.mp"/>
+    <!-- 1.读取jdbc配置文件 -->
+    <!--
+     根据执行方式不同,如:test执行,main方法执行,web项目的tomcat启动
+     都会产生不同的字节码文件的路径
+     classpath*,这个*代表所有的字节码文件的路径
+     -->
+    <conext:property-placeholder location="classpath*:jdbc.properties"/>
+    <!-- 2. 配置数据源 习惯都叫dataSource -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <!-- DI -->
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <!-- 这个位置很有可能会报错,spring${username}读取失败  -->
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="maxWait" value="600000"/>
+    </bean>
+    <!-- 3. 配置mybatis的参数包别名,映射文件的位置 SqlSessionFactoryBean -->
+    <!--
+    SqlSessionFactoryBean 是mybatis提供的mybatis-spring依赖包
+    为了和spring进行组合使用的包
+    sqlSessionFactory 相当于数据源
+    -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!-- 3.1配置数据源 -->
+        <property name="dataSource" ref="dataSource"/>
+        <!-- 3.2配置类的别名 -->
+        <property name="typeAliasesPackage" value="com.cos.mp.entity"/>
+        <!-- 3.3配置映射文件的路径 -->
+        <property name="mapperLocations" value="classpath*:com/cos/mp/mapper/*Mapper.xml"/>
+    </bean>
+    <!--4.配置MapperScanner
+        让Mybatis自己去找到dao接口,并生成对应的实现类,
+        把生成出来的实现类交给spring进行管理 (bean ioc->可以使用使用ref属性让我们DI注入实例)
+        这样我们就不需要自己类getMapper(接口.class)
+        只需要让spring注入给我们使用即可
+    -->
+    <!--
+        简单去理解MapperScannerConfigurer 就是 mybatis提供的工具类 相当于 MybatisUtils
+        ,然后会把生成出来的dao接口的实现类,自己找到spring配置bean 标签加入给spring管理
+        方便我们使用ref进行注入使用
+     -->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!-- 配置dao接口的位置,让mybatis去找到他来生成接口的实现类 -->
+        <property name="basePackage" value="com.cos.mp.dao"/>
+        <!-- 配置SqlSessionFactory
+         sqlSessionFactoryBeanName 需要的是sqlSessionFactory的名称 是字符串参数所以是value而不是ref
+         -->
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+    <!-- 5. 配置事务管理器 -->
+    <bean id="tx" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <!-- 数据源 -->
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!-- 6.设置食物管理的规则 aop -->
+    <!-- 配置事务增强 -->
+    <!-- 声明式事务 -->
+    <tx:advice id="txAdvice" transaction-manager="tx">
+        <tx:attributes>
+            <!-- name 设置方法名的匹配规则
+            以add/insert开头就是进行新增的操作
+            以update/modify开头就是进行修改的操作
+            以del/delete开头就是进行删除的操作
+            以get/select/find开头就是进行查询的操作
+            -->
+            <!--
+             isolation 设置食物的隔离级别
+             DEFAULT 不起效->本身默认值
+             DEFAULT 按照数据库的隔离级别设置 mysql->重复读 oracle->读提交
+             READ-UNCOMMITED读未提交
+             READ-COMMITED读提交 （Oracle数据库默认的隔离级别）
+             REPEATABLE-READ可重复读	（MySQL数据库默认的隔离级别）
+             SERIALIZED-READ序列化读
+             正常情况不需要去调整他的隔离级别,只需要使用默认即可
+             -->
+            <!--
+            超时时间
+             timeout="6000" 事务在6000后过期
+            -->
+            <!--
+            propagation="REQUIRED" 事务传播级别 行为
+            REQUIRED
+            SUPPORTS
+            -->
+            <!--
+            rollback-for="" 异常回滚设置,spring默认情况下运行时异常会回滚,但检查异常不会回滚
+           rollback-for= FileNotFoundException 触发找不到文件的异常就会回滚
+           一般情况下我们遇到的检查异常比较多(还有自定义异常存在,无法一个个设置),
+           所以我们会设置所有异常的父类Exception,让遇到的所有异常全部回滚
+            -->
+            <tx:method name="add*" isolation="SERIALIZABLE" timeout="6000" propagation="REQUIRED"
+                       rollback-for="Exception"/>
+            <tx:method name="insert*" rollback-for="Exception" timeout="6000"/>
+            <tx:method name="del*" rollback-for="Exception" timeout="6000"/>
+            <tx:method name="delete*" rollback-for="Exception" timeout="6000"/>
+            <tx:method name="modify*" rollback-for="Exception" timeout="6000"/>
+            <tx:method name="update*" rollback-for="Exception" timeout="6000"/>
+            <tx:method name="find*" propagation="SUPPORTS" read-only="true"/>
+            <tx:method name="select*" propagation="SUPPORTS" read-only="true"/>
+            <tx:method name="get*" propagation="SUPPORTS" read-only="true"/>
+            <!-- 兜底的方法 ,不管什么方法名,都安装默认的事务处理机制处理 -->
+            <tx:method name="*"/>
+        </tx:attributes>
+    </tx:advice>
+    <!-- 7.使用aop 配置事务增强进入使用 -->
+    <aop:config>
+        <!-- 切点表达式 -->
+        <aop:pointcut id="myPointCut" expression="execution(* com.cos.mp.services..*.*(..))"/>
+        <!-- 组合 切点表达式和增强 -->
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="myPointCut"/>
+    </aop:config>
+    <!-- 配置业务层 20-->
+<!--    <bean id="empServicesImpl" class="com.cos.mp.services.impl.EmpServicesImpl">-->
+<!--        &lt;!&ndash; spring注入 mybatis生成出来的接口实现类&ndash;&gt;-->
+<!--        &lt;!&ndash;<property name="empDao" ref="empDao"/>&ndash;&gt;-->
+<!--    </bean>-->
+    <!-- 导入其他的spring配置文件 -->
+    <!--<import resource="services-application.xml"/>-->
+</beans>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

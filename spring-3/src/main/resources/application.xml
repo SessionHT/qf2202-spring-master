@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+       ">
+    <!-- 1.注解扫描 -->
+    <context:component-scan base-package="com.cos.s3"/>
+    <!-- 2.jdbc读取 -->
+    <context:property-placeholder location="classpath*:jdbc.properties"/>
+    <!-- 3. 配置数据源 -->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+        <property name="driverClassName" value="${jdbc.driver}"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+    <!-- 4.sqlsessionfactoryBean -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!-- 数据源 -->
+        <property name="dataSource" ref="dataSource"/>
+        <!-- 包别名 -->
+        <property name="typeAliasesPackage" value="com.cos.s3.entity"/>
+        <!-- mapper 映射文件位置 -->
+        <property name="mapperLocations" value="classpath*:com/cos/s3/mapper/*Mapper.xml"/>
+    </bean>
+    <!--5. mapperScanner-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!-- dao接口包路径 -->
+        <property name="basePackage" value="com.cos.s3.dao"/>
+        <!-- sqlSessionFactory 名称 字符串 -->
+        <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+    </bean>
+    <!-- 6.事务管理器 -->
+    <bean id="tx" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+    <!-- 7.  1.注解事务的驱动 2.需要事务的类上加上事务的注解@Transactional 其他属性和bean配置是一样的 -->
+    <tx:annotation-driven transaction-manager="tx"/>
+    <!--7.事务增强-->
+<!--    <tx:advice id="txAdvice" transaction-manager="tx">-->
+<!--        <tx:attributes>-->
+<!--            <tx:method name="add*" timeout="6000" rollback-for="Exception"/>-->
+<!--            <tx:method name="addEmp" timeout="6000" rollback-for="Exception"/>-->
+<!--            <tx:method name="update*" timeout="6000" rollback-for="Exception"/>-->
+<!--            <tx:method name="del*" timeout="6000" rollback-for="Exception"/>-->
+<!--            <tx:method name="get*" read-only="true" propagation="SUPPORTS" />-->
+<!--            <tx:method name="*"/>-->
+<!--        </tx:attributes>-->
+<!--    </tx:advice>-->
+    <!-- aop 注解驱动 -->
+    <aop:aspectj-autoproxy/>
+    <!-- 8.aop -->
+<!--    <aop:config>-->
+<!--        <aop:advisor advice-ref="txAdvice" pointcut="execution(* com.cos.s3.services..*.*(..))"/>-->
+<!--    </aop:config>-->
+    <!-- 业务层的配置 -->
+
+<!--    <bean id="es" class="com.cos.s3.services.impl.EmpServicesImpl" autowire="byType">-->
+<!--        <property name="empDao" ref="empDao"/>-->
+<!--    </bean>-->
+
+
+</beans>

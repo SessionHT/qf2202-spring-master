@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+       ">
+    <!-- 1. 把我们业务类交给spring管理 -->
+    <bean id="userServices" class="com.cos.s2.services.impl.UserServicesImpl"/>
+    <!-- 增强类 前置增强 后置增强 异常增强 环绕增强  -->
+    <bean id="myBefore" class="com.cos.s2.advice.MyBefore"/>
+    <bean id="myAfter" class="com.cos.s2.advice.MyAfter"/>
+    <bean id="myExceptionAdvice" class="com.cos.s2.advice.MyExceptionAdvice"/>
+    <bean id="myMethodInterceptor" class="com.cos.s2.advice.MyMethodInterceptor"/>
+    <!-- 2.aop config 织入 -->
+    <aop:config>
+        <!-- 3. 切点表达式 -->
+        <!-- 访问修饰符 返回值类型 包 类名 方法名 (参数列表) -->
+        <aop:pointcut id="myPointCut" expression="execution(* com.cos.s2.services..*.*(..))"/>
+        <aop:pointcut id="myExceptionPointCut" expression="execution(* com.cos.s2.services..*.*(int))"/>
+        <!-- 4. 增强类  -->
+        <aop:advisor advice-ref="myBefore" pointcut-ref="myPointCut"/>
+        <aop:advisor advice-ref="myExceptionAdvice" pointcut-ref="myExceptionPointCut"/>
+        <aop:advisor advice-ref="myAfter" pointcut="execution(* com.cos.s2.services..*.getAll())"/>
+        <aop:advisor advice-ref="myMethodInterceptor"
+                     pointcut="execution(public com.cos.s2.entity.User com.cos.s2.services..*.getUserById(int))"/>
+    </aop:config>
+</beans>

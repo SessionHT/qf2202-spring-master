@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop.xsd
+       ">
+    <bean id="empServices" class="com.cos.s1.services.impl.EmpServicesImpl"></bean>
+    <bean id="userServices" class="com.cos.s1.services.impl.UserServicesImpl"></bean>
+    <!-- 配置增强类 -->
+    <bean id="before" class="com.cos.s1.advice.EmpBefore"/>
+    <bean id="after" class="com.cos.s1.advice.EmpAfter"/>
+    <bean id="around" class="com.cos.s1.advice.EmpAround"/>
+    <bean id="exception" class="com.cos.s1.advice.EmpThrows"/>
+    <!--
+     aop 就是为了帮我们添加一些额外的功能来使用
+     -->
+    <!-- aop 配置 -->
+    <aop:config >
+        <!-- 设置切点表达式 简单的理解,就是告诉我们spring,应该在那个位置加入增强的方法 -->
+        <!-- 访问修饰符 返回值类型 包 类名 方法名(参数列表) -->
+        <!--
+        execution(* com.cos.s1.services..*.*(..))
+                                                      ..是子包  *任意类  .*任意方法 (..)任意参数列表
+        访问修饰符 返回值类型 任意 在com.cos.s1.services..*.*(..)
+        -->
+<!--        <aop:pointcut id="myPointCut" expression="execution(* com.cos.s1.services..*.addEmp(..))"/>-->
+<!--        <aop:pointcut id="myPointCut" expression="execution(* com.cos.s1.services..EmpServicesImpl.*())"/>-->
+<!--        <aop:pointcut id="myPointCut" expression="execution(* com.cos.s1.services..*.*())"/>-->
+<!--        <aop:pointcut id="myPointCut" expression="execution(* com.cos.s1.services..*.*(int))"/>-->
+<!--        <aop:pointcut id="myPointCut" expression="execution(* com.cos.s1.services..*.*(com.cos.s1.entity.Emp))"/>-->
+<!--        <aop:pointcut id="myPointCut" expression="execution(* com.cos.s1.services..*.*(com.cos.s1.entity.Emp))"/>-->
+<!--        <aop:pointcut id="myPointCut" expression="execution(* com.cos.s1.services..*.*(..))"/>-->
+        <aop:pointcut id="myPointCut" expression="execution(* com.cos.s1.services..*.*(..))"/>
+        <!-- 设置业务增强 ,advice-ref 引用增强的类 pointcut-ref引用的切点表达式 -->
+<!--        <aop:advisor advice-ref="before" pointcut-ref="myPointCut"/>-->
+<!--        <aop:advisor advice-ref="after" pointcut-ref="myPointCut"/>-->
+        <aop:advisor advice-ref="around" pointcut-ref="myPointCut"/>
+        <!-- 织入 组合切点表达式和增强 -->
+        <aop:advisor advice-ref="exception" pointcut-ref="myPointCut" />
+    </aop:config>
+
+
+</beans>

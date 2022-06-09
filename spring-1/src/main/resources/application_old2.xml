@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       ">
+      <!-- 1个对象1张表 1和dao 1个services 1个controller
+       3个标签
+       注入3次
+       -->
+    <bean id="userDao" class="com.cos.s1.dao.Impl.UserDaoImpl" scope="prototype"/>
+<!--    <bean id="userDao2" class="com.cos.s1.dao.Impl.UserDaoImpl2"/>-->
+<!--    <bean id="ud" class="com.cos.s1.entity.Dog"/>-->
+    <!--
+    自动注入
+    autowire="byName" 对象中的属性名,和spring标签的id名一致相同
+                      属性名和id值没有匹配到就会报错
+    autowire="byType" 使用对象中的数据类型(相融 父类/接口),进行自动注入
+                      只能有1个该类型的对象存在,多过1个就会报错
+     -->
+    <bean id="us" class="com.cos.s1.services.impl.UserServicesImpl" autowire="byType"
+    init-method="init" destroy-method="destroy"
+    >
+<!--        <property name="ud" ref="ud"/>-->
+    </bean>
+
+
+    <bean id="con" class="com.cos.s1.factory.MyConnectionFactory"></bean>
+
+</beans>

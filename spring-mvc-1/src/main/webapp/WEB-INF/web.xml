@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+    <servlet>
+        <servlet-name>mvc123</servlet-name>
+        <!-- 前端控制器 -->
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <!-- springmvc 自己到/WEB-INF里面找一个xml文件,名称是servlet-name后面追加-servlet.xml
+         如<servlet-name>mvc</servlet-name>,他就会找 mvc-servlet.xml
+         自动读取自定义的springmvc的配置文件
+         -->
+        <init-param>
+            <!-- 设置配置文件路径 -->
+            <param-name>contextConfigLocation</param-name>
+            <!-- 设置mvc配置文件名 -->
+            <param-value>classpath*:spring-mvc.xml</param-value>
+        </init-param>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>mvc123</servlet-name>
+        <url-pattern>/</url-pattern>
+    </servlet-mapping>
+</web-app>

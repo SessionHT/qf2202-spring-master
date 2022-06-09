@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc.xsd
+       ">
+    <!-- 1. 注解扫码 只扫描 controller -->
+    <context:component-scan base-package="com.cos.m2.web.controller"></context:component-scan>
+    <!-- 2. 注解驱动 -->
+    <mvc:annotation-driven>
+        <!-- 安装FastJson,转换器 -->
+        <mvc:message-converters>
+            <bean class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+                <!-- 声明转换类型:json -->
+                <property name="supportedMediaTypes">
+                    <list>
+                        <value>application/json</value>
+                    </list>
+                </property>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+    <!-- 3.视图解析器 -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/page/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+    <!-- 4.静态资源处理 -->
+    <!--
+        当发现没有controller和方法(Handler)都不匹配请求的时候,
+        就会转给tomcat默认的servlet进行处理(静态资源的处理)
+        先把所有的controller全过了找不到,才去静态处理
+    -->
+<!--    <mvc:default-servlet-handler/>-->
+    <!-- 资源映射标签 -->
+    <!--
+     mapping 设置 访问的url路径  /img/1.gif
+     location 设置项目资源位置 /static/img/
+
+     /img/1.gif
+     -->
+<!--    <mvc:resources mapping="/js/**" location="/static/js/"/>-->
+<!--    <mvc:resources mapping="/img/**" location="/static/img/"/>-->
+<!--    <mvc:resources mapping="/css/**" location="/static/css/"/>-->
+<!--    <mvc:resources mapping="/**" location="/static/"/>-->
+</beans>
